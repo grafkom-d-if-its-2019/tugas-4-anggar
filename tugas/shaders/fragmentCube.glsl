@@ -22,7 +22,17 @@ void main() {
   // Untuk mendapatkan nilai warna (RGBA) dari tekstur
   vec4 textureColor = texture2D(sampler0, fTexCoord);
 
-  vec3 diffuse = diffuseColor * textureColor.rgb * normalDotLight;
+  float specularPower = 52.0;
+  float specular = 0.0;
+
+  if (normalDotLight > 0.0) {
+    vec3 viewVec = vec3(0,0,1.0);
+    vec3 reflectVec = reflect(-diffuseDirection, fNormal);
+    float specularFactor = max(dot(reflectVec, viewVec), 0.0);
+    specular = pow(specularFactor, specularPower);
+  }
+
+  vec3 diffuse = diffuseColor * textureColor.rgb * normalDotLight + specular;
   vec3 ambient = ambientColor * textureColor.rgb;
 
   gl_FragColor = vec4(diffuse + ambient, 1.0);

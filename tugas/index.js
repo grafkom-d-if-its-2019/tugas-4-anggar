@@ -23,8 +23,10 @@
 
     // Connection for uniform value for translation purpose
     let thetaUniformLocation = gl.getUniformLocation(programChar, 'theta');
-    let theta = Math.PI;
-    let thetaSpeed = Math.PI/72;
+    let theta = 0;
+    let thetaSpeed = 0;
+    var xAxis = 0;
+    var yAxis = 1;
     // const yscaleUniformLocation = gl.getUniformLocation(program, 'yscale');    
     // let yscaler = 0.0;
     let camera = {x: 0.5, y: 1.0, z: 0.5};
@@ -34,11 +36,12 @@
     let mmLoc;
     let mm;
 
+      mm = glMatrix.mat4.create();
+      glMatrix.mat4.translate(mm, mm, [0.0, 0.0, -2.0]);
+
     function setScene(program){
       // Model matrix definition
       mmLoc = gl.getUniformLocation(program, "modelMatrix");
-      mm = glMatrix.mat4.create();
-      glMatrix.mat4.translate(mm, mm, [0.0, 0.0, -2.0]);
 
       // View matrix and projection configuration
       const vmLoc = gl.getUniformLocation(program, 'viewMatrix');
@@ -53,6 +56,11 @@
         10.0,     // far
       );
       gl.uniformMatrix4fv(pmLoc, false, pm);
+
+      glMatrix.mat4.rotateZ(mm, mm, thetaSpeed);
+      glMatrix.mat4.rotateY(mm, mm, thetaSpeed * 2);
+      glMatrix.mat4.rotateX(mm, mm, thetaSpeed);
+      gl.uniformMatrix4fv(mmLoc, false, mm);
 
       // Lighting uniform
       const dcLoc = gl.getUniformLocation(program, 'diffuseColor');
@@ -70,7 +78,7 @@
       gl.uniformMatrix3fv(nmLoc, false, nm);
 
       const acLoc = gl.getUniformLocation(program, 'ambientColor');
-      const ac = glMatrix.vec3.fromValues(0.01, 0.02, 0.02);
+      const ac = glMatrix.vec3.fromValues(0.17, 0.14, 0.52);
       gl.uniform3fv(acLoc, ac);
 
       gl.enable(gl.DEPTH_TEST);
@@ -84,10 +92,7 @@
       gl.uniformMatrix4fv(vmLoc, false, vm);
 
       // Rotation using glMatrix
-      glMatrix.mat4.rotateZ(mm, mm, thetaSpeed);
-      glMatrix.mat4.rotateY(mm, mm, thetaSpeed * 2);
-      glMatrix.mat4.rotateX(mm, mm, thetaSpeed);
-      gl.uniformMatrix4fv(mmLoc, false, mm);
+
     }
 
     function setBuffer(program, vertices, dim=3, type='cube'){
@@ -130,6 +135,7 @@
         
         gl.enableVertexAttribArray(vPostion);
 
+      
       document.addEventListener('keydown', onKeyDown);
     }
 
@@ -322,7 +328,48 @@
 
     initTexture();
 
-    setTimeout(null, 10000);
+    // Kontrol menggunakan mouse
+    let dragging, lastx, lasty;
+    function onMouseDown(event) {
+      var x = event.clientX;
+      var y = event.clientY;
+      var rect = event.target.getBoundingClientRect();
+      // Saat mouse diklik di area aktif browser,
+      //  maka flag dragging akan diaktifkan
+      if (
+        rect.left <= x &&
+        rect.right > x &&
+        rect.top <= y &&
+        rect.bottom > y
+      ) {
+        dragging = true;
+        lastx = x;
+        lasty = y;
+      }
+    }
+    function onMouseUp(event) {
+      // Ketika klik kiri mouse dilepas
+      dragging = false;
+    }
+    function onMouseMove(event) {
+      var x = event.clientX;
+      var y = event.clientY;
+      if (dragging) {
+        factor = 10 / canvas.height;
+        var dx = factor * (x - lastx);
+        var dy = factor * (y - lasty);
+        // Menggunakan dx dan dy untuk memutar kubus
+        glMatrix.mat4.rotateY(mm, mm, dx);
+        glMatrix.mat4.rotateX(mm, mm, dy);
+        // console.log(mm)
+      }
+      lastx = x;
+      lasty = y;
+    }
+    
+    document.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('mouseup', onMouseUp);
+    document.addEventListener('mousemove', onMouseMove);
 
     function render() {
       theta += 0.052;
@@ -333,13 +380,13 @@
       // gl.uniform1f(thetaUniformLocation, theta);
 
       // Drawing
+
       cube();
       gl.drawArrays(gl.TRIANGLES, 0, 30);
 
-
       triangle();
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 21);
-
+      
       requestAnimationFrame(render);
     }
 
