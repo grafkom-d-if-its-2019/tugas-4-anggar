@@ -59,5 +59,5 @@ void main() {
 	fNormal = normalize(normalMatrix * vNormal);
 
 	// Transfer posisi verteks
-	fPosition = vec3(modelMatrix * vec4(vPosition, 1.0));
+	fPosition = vPosition;
 }

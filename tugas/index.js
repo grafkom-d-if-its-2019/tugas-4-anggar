@@ -56,18 +56,24 @@
 
       // Lighting uniform
       const dcLoc = gl.getUniformLocation(program, 'diffuseColor');
-      const dc = glMatrix.vec3.fromValues(1.0, 1.0, 1.0);
+      const dc = glMatrix.vec3.fromValues(0.75, 0.75, 0.75);
       gl.uniform3fv(dcLoc, dc);
 
       const ddLoc = gl.getUniformLocation(program, 'diffusePosition');
-      const dd = glMatrix.vec3.fromValues(1., 2., 1.7);
+      // console.log(position);
+      const dd = glMatrix.vec3.fromValues(position[0], position[1], position[2]);
       gl.uniform3fv(ddLoc, dd);
 
+      nmLoc = gl.getUniformLocation(program, 'normalMatrix');
+      let nm = glMatrix.mat3.create();
+      glMatrix.mat3.normalFromMat4(nm, mm);
+      gl.uniformMatrix3fv(nmLoc, false, nm);
+
       const acLoc = gl.getUniformLocation(program, 'ambientColor');
-      const ac = glMatrix.vec3.fromValues(0.2, 0.2, 0.2);
+      const ac = glMatrix.vec3.fromValues(0.01, 0.02, 0.02);
       gl.uniform3fv(acLoc, ac);
 
-      nmLoc = gl.getUniformLocation(programCube, 'normalMatrix');
+      gl.enable(gl.DEPTH_TEST);
 
       // Camera view position
       glMatrix.mat4.lookAt(vm,
@@ -206,7 +212,7 @@
             vertices.push(cubeColors[a][j]);
           }
           for (var j=0; j < 3; j++) {
-            vertices.push(cubeNormals[a][j]);
+            vertices.push(-1 * cubeNormals[a][j]);
           }
           switch (indices[i]) {
             case a:
@@ -328,15 +334,10 @@
 
       // Drawing
       cube();
-      let nm = glMatrix.mat3.create();
-      glMatrix.mat3.normalFromMat4(nm, mm);
-      gl.uniformMatrix4fv(nmLoc, false, nm);
       gl.drawArrays(gl.TRIANGLES, 0, 30);
 
+
       triangle();
-      nm = glMatrix.mat3.create();
-      glMatrix.mat3.normalFromMat4(nm, mm);
-      gl.uniformMatrix4fv(nmLoc, false, nm);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 21);
 
       requestAnimationFrame(render);
