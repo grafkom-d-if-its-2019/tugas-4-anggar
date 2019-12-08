@@ -156,7 +156,7 @@
       
       // Asynchronously load an image
       var image = new Image();
-      image.src = "images/diamond-ore.png";
+      image.src = "images/group.png";
       image.addEventListener('load', function() {
         // Now that the image has loaded make copy it to the texture.
         gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -188,6 +188,7 @@
       ];
 
       const cubeColors = [
+        [],
         [1.0, 0.0, 0.0],
         [1.0, 0.0, 0.0],
         [0.0, 1.0, 0.0],
@@ -195,6 +196,7 @@
         [1.0, 1.0, 1.0],
         [1.0, 0.5, 0.0],
         [1.0, 1.0, 0.0],
+        []
       ];
 
       const cubeNormals = [
@@ -222,19 +224,19 @@
           }
           switch (indices[i]) {
             case a:
-              vertices.push(0.0);
+              vertices.push((a-2)*0.125);
               vertices.push(0.0);
               break;
             case b:
-              vertices.push(0.0);
+              vertices.push((a-2)*0.125);
               vertices.push(1.0);
               break;
             case c:
-              vertices.push(1.0);
+              vertices.push((a-1)*0.125);
               vertices.push(1.0);
               break;
             case d:
-              vertices.push(1.0);
+              vertices.push((a-1)*0.125);
               vertices.push(0.0);
               break;
           
@@ -251,10 +253,6 @@
       quad(5, 4, 0, 1);
       quad(6, 5, 1, 2);
 
-      vertices.push(...cubePoints[6]);
-      vertices.push(...cubeColors[1]);
-      vertices.push(...cubePoints[2]);
-      vertices.push(...cubeColors[1]);
 
       setBuffer(program, vertices);
       setScene(program);
